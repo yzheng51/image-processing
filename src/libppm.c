@@ -218,13 +218,14 @@ void ppm_writeppm(FILE *fp, pixel *pixels, int cols, int rows, pixval maxvalP, i
         return;
     }
 
-    fprintf(fp, "P3\n%d\n%d\n%d\n", cols, rows, maxvalP);
+    int index;
+    fprintf(fp, "P3\n%d\n%d\n%d", cols, rows, maxvalP);
     for (int i = 0; i < cols; ++i) {
-        for (int j = 0; j < rows - 1; ++j) {
-            int index = i * cols + j;
-            fprintf(fp, "%d %d %d\t", pixels[index].r, pixels[index].g, pixels[index].b);
+        index = i * cols;
+        fprintf(fp, "\n%d %d %d", pixels[index].r, pixels[index].g, pixels[index].b);
+        for (int j = 1; j < rows; ++j) {
+            index += 1;
+            fprintf(fp, "\t%d %d %d", pixels[index].r, pixels[index].g, pixels[index].b);
         }
-        int index = i * cols + rows - 1;
-        fprintf(fp, "%d %d %d\n", pixels[index].r, pixels[index].g, pixels[index].b);
     }
 }
