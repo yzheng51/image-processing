@@ -8,6 +8,7 @@
  * @copyright Copyright (c) 2019, yzheng
  *
  */
+#include "libppm.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -21,12 +22,25 @@ typedef enum MODE { CPU, OPENMP, CUDA, ALL } MODE;
 
 unsigned int c = 0;
 MODE execution_mode = CPU;
+PPM_FORMAT fmt = PPM_BINARY;
+char *input_file, *output_file;
 
 int main(int argc, char *argv[]) {
     if (process_command_line(argc, argv) == FAILURE)
         return 1;
 
-    //TODO: read input image file (either binary or plain text PPM)
+    // read input image file (either binary or plain text PPM)
+    FILE *fp = NULL;
+    int cols, rows;              // width and height of the input ppm file
+    pixval maxval;               // max color value for ppm file, which must be 255 and will be checked in ppm_readppm()
+    pixel *pixels_i, *pixels_o;  // pixel data of the output ppm file
+
+    if ((fp = fopen(input_file, "rb")) == NULL) {
+        fprintf(stderr, "Error: opening '%s' failed. Please check your filename.\n", input_file);
+        return FAILURE;
+    }
+    pixels_i = ppm_readppm(fp, &cols, &rows, &maxval);
+    pixels_o = ppm_allocarray(cols, rows);
 
     //TODO: execute the mosaic filter based on the mode
     switch (execution_mode){
@@ -64,7 +78,23 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    //save the output image file (from last executed mode)
+    // close the input file and set the file pointer to null
+    // this pointer will be used by output file
+    // so it is set to null manually for safety
+    fclose(fp); fp = NULL;
+
+    // save the output image file (from last executed mode)
+    if ((fp = fopen(output_file, "wb")) == NULL) {
+        fprintf(stderr, "Error: opening '%s' failed. Please check your filename.\n", output_file);
+        return FAILURE;
+    }
+    ppm_writeppm(fp, pixels_i, cols, rows, maxval, fmt);
+    // ppm_writeppm(fp, pixels_o, cols, rows, maxval, fmt);
+
+    // clean up
+    fclose(fp);
+    free(input_file); free(output_file);
+    ppm_freearray(pixels_i); ppm_freearray(pixels_o);
 
     return 0;
 }
@@ -87,6 +117,45 @@ void print_help() {
            "\t               PPM_PLAIN_TEXT\n ");
 }
 
+int check_cell_size(char *ch) {
+    // the first character in the second argument should be a digit or +
+    // after then, they should be digit or '.' (for float number)
+    if (!(*ch == '+' || (*ch >= '0' && *ch <= '9'))) {
+        fprintf(stderr, "Error: Mosaic cell size argument 'C' must be in greater than 0.\n");
+        return FAILURE;
+    }
+
+    // ch should be end up with '\0', otherwise it is invalid
+    do {
+        ch++;
+    } while ((*ch >= '0' && *ch <= '9') || *ch == '.');
+
+    if (*ch) {
+        fprintf(stderr, "Error: Mosaic cell size argument 'C' must be in greater than 0.\n");
+        return FAILURE;
+    }
+
+    return SUCCESS;
+}
+
+MODE get_mode(char *ch) {
+    if (strcmp(ch, "CPU") == 0) {
+        return CPU;
+    }
+    if (strcmp(ch, "OPENMP") == 0) {
+        return OPENMP;
+    }
+    if (strcmp(ch, "CUDA") == 0) {
+        return CUDA;
+    }
+    if (strcmp(ch, "ALL") == 0) {
+        return ALL;
+    }
+
+    fprintf(stderr, "Error: Mode should be CPU, OPENMP, CUDA or ALL.\n");
+    exit(1);
+}
+
 int process_command_line(int argc, char *argv[]){
     if (argc < 7){
         fprintf(stderr, "Error: Missing program arguments. Correct usage is...\n");
@@ -94,18 +163,66 @@ int process_command_line(int argc, char *argv[]){
         return FAILURE;
     }
 
-    //first argument is always the executable name
-
-    //read in the non optional command line arguments
+    // read in the non optional command line arguments
+    if (check_cell_size(argv[1]) == FAILURE) {
+        return FAILURE;
+    }
     c = (unsigned int)atoi(argv[1]);
 
-    //TODO: read in the mode
+    // read in the mode
+    execution_mode = get_mode(argv[2]);
 
-    //TODO: read in the input image name
+    // read in the input image name
+    if (strcmp(argv[3], "-i") != 0) {
+        fprintf(stderr, "Error: Third argument must be '-i' to specify input image filename. Correct usage is...\n");
+        print_help();
+        return FAILURE;
+    }
+    // allocate the memory for file name based on the input
+    input_file = (char *)malloc((strlen(argv[4]) + 1) * sizeof(char));
+    if (input_file == NULL) {
+        fprintf(stderr, "Error: Memory allocation failed.\n");
+        return FAILURE;
+    }
+    // use strcpy rather than strncpy here because it is safe
+    // the length of the two string must be the same
+    strcpy(input_file, argv[4]);
 
-    //TODO: read in the output image name
+    // read in the output image name
+    if (strcmp(argv[5], "-o") != 0) {
+        fprintf(stderr, "Error: Fifth argument must be '-o' to specify output image filename. Correct usage is...\n");
+        print_help();
+        return FAILURE;
+    }
+    output_file = (char *)malloc((strlen(argv[6]) + 1) * sizeof(char));
+    if (output_file == NULL) {
+        fprintf(stderr, "Error: Memory allocation failed.\n");
+        return FAILURE;
+    }
+    strcpy(output_file, argv[6]);
 
-    //TODO: read in any optional part 3 arguments
+    // read in any optional part 3 arguments
+    // start checking until the program find '-f'
+    for (int i = 7; i < argc; i++) {
+        if (strcmp(argv[i], "-f") == 0) {
+            // '-f' found, check whether next argument exist
+            if (i + 1 == argc) {
+                fprintf(stderr, "Error: 'PPM_BINARY' or 'PPM_PLAIN_TEXT' format expected after '-f' switch.\n");
+                return FAILURE;
+            }
+            if (strcmp(argv[i + 1], "PPM_PLAIN_TEXT") == 0) {
+                fmt = PPM_PLAIN_TEXT;
+                i++;  // increase the counter to avoid find PPM_PLAIN_TEXT again, safe due to above check
+            } else if (strcmp(argv[i + 1], "PPM_BINARY") == 0) {
+                i++;  // increase the counter to avoid find PPM_BINARY again
+            } else {
+                fprintf(stderr, "Error: 'PPM_BINARY' or 'PPM_PLAIN_TEXT' format expected after '-f' switch.\n");
+                return FAILURE;
+            }
+        } else {
+            fprintf(stderr, "Warning: Unrecognised optional argument '%s' ignored.\n", argv[i]);
+        }
+    }
 
     return SUCCESS;
 }
