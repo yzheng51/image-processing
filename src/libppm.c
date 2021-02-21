@@ -115,7 +115,7 @@ PPM_FORMAT ppm_readmagicnumber(FILE *fp) {
 pixel *ppm_allocarray(int cols, int rows) {
     pixel *pixels = NULL;
 
-    pixels = (pixel *)malloc(rows * cols * sizeof(pixel *));
+    pixels = (pixel *)malloc(rows * cols * sizeof(pixel));
     // check whether the allocation is successful, the same in loop
     if (pixels == NULL) {
         fprintf(stderr, "Error: Memory allocation failed.\n");
@@ -180,7 +180,7 @@ pixel *ppm_readppm(FILE *fp, int *colsP, int *rowsP, pixval *maxvalP) {
     int cols = *colsP;
 
     if (format == PPM_BINARY) {
-        fread(pixels, sizeof(pixels), rows * cols, fp);
+        fread(pixels, sizeof(pixel), rows * cols, fp);
         return pixels;
     }
     // for PPM_PLAIN_TEXT
