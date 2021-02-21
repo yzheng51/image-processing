@@ -86,8 +86,6 @@ int ppm_getint(FILE *fp) {
  * @return PPM_FORMAT
  */
 PPM_FORMAT ppm_readmagicnumber(FILE *fp) {
-    PPM_FORMAT fmt;
-
     // check P
     if ((ppm_getc(fp)) != 'P') {
         fprintf(stderr, "Error: Incorrect format for PPM, the first line should be P3 or P6.\n");
