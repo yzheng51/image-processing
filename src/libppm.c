@@ -95,19 +95,16 @@ PPM_FORMAT ppm_readmagicnumber(FILE *fp) {
     }
 
     // check binary or plain text (3 or 6)
-    switch (ppm_getint(fp)) {
-        case 3:
-            fmt = PPM_PLAIN_TEXT;
-            break;
-        case 6:
-            fmt = PPM_BINARY;
-            break;
-        default:
-            fprintf(stderr, "Error: Incorrect format for PPM, the first line should be P3 or P6.\n");
-            exit(1);
+    int n = ppm_getint(fp);
+    if (n == 3) {
+        return PPM_PLAIN_TEXT;
+    }
+    if (n == 6) {
+        return PPM_BINARY;
     }
 
-    return fmt;
+    fprintf(stderr, "Error: Incorrect format for PPM, the first line should be P3 or P6.\n");
+    exit(1);
 }
 
 /**
