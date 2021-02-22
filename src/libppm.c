@@ -183,17 +183,21 @@ pixel *ppm_readppm(FILE *fp, int *colsP, int *rowsP, pixval *maxvalP) {
         fread(pixels, sizeof(pixel), rows * cols, fp);
         return pixels;
     }
-    // for PPM_PLAIN_TEXT
-    for (int i = 0; i < cols; ++i) {
-        for (int j = 0; j < rows; ++j) {
-            int index = i * cols + j;
-            pixels[index].r = ppm_getint(fp);
-            pixels[index].g = ppm_getint(fp);
-            pixels[index].b = ppm_getint(fp);
+    if (format == PPM_PLAIN_TEXT) {
+        for (int i = 0; i < cols; ++i) {
+            int index = i * cols;
+            for (int j = 0; j < rows; ++j) {
+                ++index;
+                pixels[index].r = ppm_getint(fp);
+                pixels[index].g = ppm_getint(fp);
+                pixels[index].b = ppm_getint(fp);
+            }
         }
+        return pixels;
     }
 
-    return pixels;
+    fprintf(stderr, "Error: Incorrect format for PPM, the first line should be P3 or P6.\n");
+    exit(1);
 }
 
 /**
@@ -219,7 +223,7 @@ void ppm_writeppm(FILE *fp, pixel *pixels, int cols, int rows, pixval maxvalP, i
         index = i * cols;
         fprintf(fp, "\n%d %d %d", pixels[index].r, pixels[index].g, pixels[index].b);
         for (int j = 1; j < rows; ++j) {
-            index += 1;
+            ++index;
             fprintf(fp, "\t%d %d %d", pixels[index].r, pixels[index].g, pixels[index].b);
         }
     }
