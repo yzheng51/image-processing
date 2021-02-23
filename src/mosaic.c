@@ -43,11 +43,11 @@ int main(int argc, char *argv[]) {
     pixels_i = ppm_readppm(fp, &cols, &rows, &maxval);
     pixels_o = ppm_allocarray(cols, rows);
 
-    if (c > rows) {
+    if ((int)c > rows) {
         fprintf(stderr, "Error: Height of the image is less than the specified C value.\n");
         exit(1);
     }
-    if (c > cols) {
+    if ((int)c > cols) {
         fprintf(stderr, "Error: Width of the image is less than the specified C value.\n");
         exit(1);
     }
