@@ -59,15 +59,7 @@ int main(int argc, char *argv[]) {
             break;
         }
         case (OPENMP) : {
-            //TODO: starting timing here
-
-            //TODO: calculate the average colour value
-
-            // Output the average colour value for the image
-            printf("OPENMP Average image colour red = ???, green = ???, blue = ??? \n");
-
-            //TODO: end timing here
-            printf("OPENMP mode execution time took ??? s and ?? ?ms\n");
+            mosaic_transform_omp(pixels_o, pixels_i, cols, rows, c);
             break;
         }
         case (CUDA) : {
