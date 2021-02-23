@@ -9,6 +9,7 @@
  *
  */
 #include "libppm.h"
+#include "filter.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -42,18 +43,19 @@ int main(int argc, char *argv[]) {
     pixels_i = ppm_readppm(fp, &cols, &rows, &maxval);
     pixels_o = ppm_allocarray(cols, rows);
 
+    if (c > rows) {
+        fprintf(stderr, "Error: Height of the image is less than the specified C value.\n");
+        exit(1);
+    }
+    if (c > cols) {
+        fprintf(stderr, "Error: Width of the image is less than the specified C value.\n");
+        exit(1);
+    }
+
     //TODO: execute the mosaic filter based on the mode
     switch (execution_mode){
         case (CPU) : {
-            //TODO: starting timing here
-
-            //TODO: calculate the average colour value
-
-            // Output the average colour value for the image
-            printf("CPU Average image colour red = ???, green = ???, blue = ??? \n");
-
-            //TODO: end timing here
-            printf("CPU mode execution time took ??? s and ???ms\n");
+            mosaic_transform(pixels_o, pixels_i, cols, rows, c);
             break;
         }
         case (OPENMP) : {
@@ -88,8 +90,7 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, "Error: opening '%s' failed. Please check your filename.\n", output_file);
         return FAILURE;
     }
-    ppm_writeppm(fp, pixels_i, cols, rows, maxval, fmt);
-    // ppm_writeppm(fp, pixels_o, cols, rows, maxval, fmt);
+    ppm_writeppm(fp, pixels_o, cols, rows, maxval, fmt);
 
     // clean up
     fclose(fp);
