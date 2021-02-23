@@ -197,24 +197,26 @@ int process_command_line(int argc, char *argv[]){
     // read in any optional part 3 arguments
     // start checking until the program find '-f'
     for (int i = 7; i < argc; i++) {
-        if (strcmp(argv[i], "-f") == 0) {
-            // '-f' found, check whether next argument exist
-            if (i + 1 == argc) {
-                fprintf(stderr, "Error: 'PPM_BINARY' or 'PPM_PLAIN_TEXT' format expected after '-f' switch.\n");
-                return FAILURE;
-            }
-            if (strcmp(argv[i + 1], "PPM_PLAIN_TEXT") == 0) {
-                fmt = PPM_PLAIN_TEXT;
-                i++;  // increase the counter to avoid find PPM_PLAIN_TEXT again, safe due to above check
-            } else if (strcmp(argv[i + 1], "PPM_BINARY") == 0) {
-                i++;  // increase the counter to avoid find PPM_BINARY again
-            } else {
-                fprintf(stderr, "Error: 'PPM_BINARY' or 'PPM_PLAIN_TEXT' format expected after '-f' switch.\n");
-                return FAILURE;
-            }
-        } else {
+        if (strcmp(argv[i], "-f") != 0) {
             fprintf(stderr, "Warning: Unrecognised optional argument '%s' ignored.\n", argv[i]);
+            continue;
         }
+        // '-f' found, check whether next argument exist
+        if (i + 1 == argc) {
+            fprintf(stderr, "Error: 'PPM_BINARY' or 'PPM_PLAIN_TEXT' format expected after '-f' switch.\n");
+            return FAILURE;
+        }
+        if (strcmp(argv[i + 1], "PPM_PLAIN_TEXT") == 0) {
+            fmt = PPM_PLAIN_TEXT;
+            i++;  // increase the counter to avoid find PPM_PLAIN_TEXT again, safe due to above check
+            continue;
+        }
+        if (strcmp(argv[i + 1], "PPM_BINARY") == 0) {
+            i++;  // increase the counter to avoid find PPM_BINARY again
+            continue;
+        }
+        fprintf(stderr, "Error: 'PPM_BINARY' or 'PPM_PLAIN_TEXT' format expected after '-f' switch.\n");
+        return FAILURE;
     }
 
     return SUCCESS;
