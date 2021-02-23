@@ -184,14 +184,10 @@ pixel *ppm_readppm(FILE *fp, int *colsP, int *rowsP, pixval *maxvalP) {
         return pixels;
     }
     if (format == PPM_PLAIN_TEXT) {
-        for (int i = 0; i < cols; ++i) {
-            int index = i * cols;
-            for (int j = 0; j < rows; ++j) {
-                ++index;
-                pixels[index].r = ppm_getint(fp);
-                pixels[index].g = ppm_getint(fp);
-                pixels[index].b = ppm_getint(fp);
-            }
+        for (int i = 0; i < rows * cols; ++i) {
+            pixels[i].r = ppm_getint(fp);
+            pixels[i].g = ppm_getint(fp);
+            pixels[i].b = ppm_getint(fp);
         }
         return pixels;
     }
@@ -217,12 +213,11 @@ void ppm_writeppm(FILE *fp, pixel *pixels, int cols, int rows, pixval maxvalP, i
         return;
     }
 
-    int index;
     fprintf(fp, "P3\n%d\n%d\n%d", cols, rows, maxvalP);
-    for (int i = 0; i < cols; ++i) {
-        index = i * cols;
+    for (int i = 0; i < rows; ++i) {
+        int index = i * cols;
         fprintf(fp, "\n%d %d %d", pixels[index].r, pixels[index].g, pixels[index].b);
-        for (int j = 1; j < rows; ++j) {
+        for (int j = 1; j < cols; ++j) {
             ++index;
             fprintf(fp, "\t%d %d %d", pixels[index].r, pixels[index].g, pixels[index].b);
         }
