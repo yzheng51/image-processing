@@ -69,7 +69,9 @@ int main(int argc, char *argv[]) {
             break;
         }
         case (ALL) : {
-            //TODO
+            mosaic_transform(pixels_o, pixels_i, cols, rows, c);
+            printf("\n");
+            mosaic_transform_omp(pixels_o, pixels_i, cols, rows, c);
             break;
         }
     }
