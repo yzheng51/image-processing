@@ -46,6 +46,7 @@ void mosaic_transform(pixel *pixels_o, pixel *pixels_i, int cols, int rows, int 
             int x_rows = (x == m_rows - 1) ? rows - x * c : c;
             int y_cols = (y == m_cols - 1) ? cols - y * c : c;
             int m_area = x_rows * y_cols;
+
             block_sum_r = 0, block_sum_g = 0, block_sum_b = 0;
 
             for (i = 0; i < x_rows; ++i) {
@@ -115,11 +116,11 @@ void mosaic_transform_omp(pixel *pixels_o, pixel *pixels_i, int cols, int rows, 
 #pragma omp parallel for private(x, y, i, j, block_sum_r, block_sum_g, block_sum_b) reduction(+ : average_r, average_g, average_b)
     for (x = 0; x < m_rows; ++x) {
         for (y = 0; y < m_cols; ++y) {
-            // int avg_offset = x * m_cols + y;
-            block_sum_r = 0, block_sum_g = 0, block_sum_b = 0;
             int x_rows = (x == m_rows - 1) ? rows - x * c : c;
             int y_cols = (y == m_cols - 1) ? cols - y * c : c;
             int m_area = x_rows * y_cols;
+
+            block_sum_r = 0, block_sum_g = 0, block_sum_b = 0;
 
             for (i = 0; i < x_rows; ++i) {
                 for (j = 0; j < y_cols; ++j) {
