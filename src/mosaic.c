@@ -45,11 +45,11 @@ int main(int argc, char *argv[]) {
     pixels_i = ppm_readppm(fp, &cols, &rows, &maxval);
     pixels_o = ppm_allocarray(cols, rows);
 
-    if ((int)c > rows) {
+    if (c > (unsigned int)rows) {
         fprintf(stderr, "Error: Height of the image is less than the specified C value.\n");
         exit(1);
     }
-    if ((int)c > cols) {
+    if (c > (unsigned int)cols) {
         fprintf(stderr, "Error: Width of the image is less than the specified C value.\n");
         exit(1);
     }
@@ -198,7 +198,7 @@ int process_command_line(int argc, char *argv[]){
 
     // read in any optional part 3 arguments
     // start checking until the program find '-f'
-    for (int i = 7; i < argc; i++) {
+    for (int i = 7; i < argc; ++i) {
         if (strcmp(argv[i], "-f") != 0) {
             fprintf(stderr, "Warning: Unrecognised optional argument '%s' ignored.\n", argv[i]);
             continue;
