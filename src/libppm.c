@@ -177,15 +177,14 @@ pixel *ppm_readppm(FILE *fp, int *colsP, int *rowsP, pixval *maxvalP) {
     ppm_readppminit(fp, colsP, rowsP, maxvalP, &format);
     pixels = ppm_allocarray(*colsP, *rowsP);
 
-    int rows = *rowsP;
-    int cols = *colsP;
+    int n_pixels = (*rowsP) * (*colsP);
 
     if (format == PPM_BINARY) {
-        fread(pixels, sizeof(pixel), rows * cols, fp);
+        fread(pixels, sizeof(pixel), n_pixels, fp);
         return pixels;
     }
     if (format == PPM_PLAIN_TEXT) {
-        for (int i = 0; i < rows * cols; ++i) {
+        for (int i = 0; i < n_pixels; ++i) {
             pixels[i].r = ppm_getint(fp);
             pixels[i].g = ppm_getint(fp);
             pixels[i].b = ppm_getint(fp);
