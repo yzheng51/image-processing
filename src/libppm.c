@@ -17,8 +17,9 @@
  * @copyright Copyright (c) 2019, yzheng
  *
  */
-#include "libppm.h"
 #include <stdlib.h>
+
+#include "libppm.h"
 
 /**
  * @Read a character from the file stream and skip comments

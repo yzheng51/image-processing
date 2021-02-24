@@ -1,17 +1,18 @@
 /**
- * @file mf.c
+ * @file filter.c
  * @yzheng
  * @mosaic filter
- *  only mosaic_transform() and image_average_value() (and its OPENMP version) are used in mosaic.c
+ *  only mosaic_transform() and image_average_value() (and its OpenMP version) are used in mosaic.c
  * @version 0.1
  * @date 2019-03-09
  *
  * @copyright Copyright (c) 2019, yzheng
  *
  */
-#include "filter.h"
 #include <omp.h>
 #include <stdlib.h>
+
+#include "filter.h"
 
 /**
  * @Allocate memory and initialise the rgb value for lpixel matrices

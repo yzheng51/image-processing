@@ -8,10 +8,12 @@
  * @copyright Copyright (c) 2019, yzheng
  *
  */
-#include "libppm.h"
-#include "filter.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+
+#include "libppm.h"
+#include "filter.h"
 
 #define FAILURE 0
 #define SUCCESS !FAILURE
