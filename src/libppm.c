@@ -107,7 +107,7 @@ PPM_FORMAT ppm_readmagicnumber(FILE *fp) {
 }
 
 /**
- * @Memory allocation of pixel matrices
+ * @Memory allocation of pixel array
  *
  * @param cols
  * @param rows
@@ -117,7 +117,6 @@ pixel *ppm_allocarray(int cols, int rows) {
     pixel *pixels = NULL;
 
     pixels = (pixel *)malloc(rows * cols * sizeof(pixel));
-    // check whether the allocation is successful, the same in loop
     if (pixels == NULL) {
         fprintf(stderr, "Error: Memory allocation failed.\n");
         exit(1);
@@ -127,7 +126,7 @@ pixel *ppm_allocarray(int cols, int rows) {
 }
 
 /**
- * @Free pixel matrices
+ * @Free pixel array
  *
  * @param pixels
  */
@@ -162,7 +161,7 @@ void ppm_readppminit(FILE *fp, int *colsP, int *rowsP, pixval *maxvalP, PPM_FORM
 }
 
 /**
- * @Read an entire image, including all above
+ * @Read an entire image
  *
  * @param fp
  * @param colsP
@@ -197,7 +196,7 @@ pixel *ppm_readppm(FILE *fp, int *colsP, int *rowsP, pixval *maxvalP) {
 }
 
 /**
- * @Write an entire image, calling two function above
+ * @Write an entire image
  *
  * @param fp
  * @param pixels

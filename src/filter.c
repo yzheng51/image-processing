@@ -2,7 +2,7 @@
  * @file filter.c
  * @yzheng
  * @mosaic filter
- *  only mosaic_transform() and image_average_value() (and its OpenMP version) are used in mosaic.c
+ *
  * @version 0.1
  * @date 2019-03-09
  *
@@ -16,10 +16,8 @@
 
 /**
  * @Mosaic filter
- *  this algorithm is to create a pixel matrix to store the average rgb
- *  value of the original image. its dimension is (m_rows x is m_cols)
- *  due to average, some data type casting is used here as well as the integer
- *  over flow check
+ *  divide all pixels into several blocks depend on c
+ *  for each block sum up all pixel values and compute the average
  *
  * @param pixels_o
  * @param pixels_i
@@ -30,7 +28,7 @@
 void mosaic_transform(pixel *pixels_o, pixel *pixels_i, int cols, int rows, int c) {
     int x, y, i, j;                                     // loop counter
     int m_rows = (rows % c) ? rows / c + 1 : rows / c;  // check whether cols (rows) can be divided by c
-    int m_cols = (cols % c) ? cols / c + 1 : cols / c;  // if not, plus one to ensure enough memory has benn allocated
+    int m_cols = (cols % c) ? cols / c + 1 : cols / c;  // if not, plus one to ensure all pixels has been traversed
     int area = cols * rows;
     unsigned long long average_r, average_g, average_b;
     unsigned long long block_sum_r, block_sum_g, block_sum_b;
@@ -39,15 +37,17 @@ void mosaic_transform(pixel *pixels_o, pixel *pixels_i, int cols, int rows, int 
     average_r = 0; average_g = 0; average_b = 0;
 
     begin = omp_get_wtime();
-    // sum up all rgb values and stor in the average pixel
+
     for (x = 0; x < m_rows; ++x) {
         for (y = 0; y < m_cols; ++y) {
+            // partial mosaic for indivisible edges parts, and compute area
             int x_rows = (x == m_rows - 1) ? rows - x * c : c;
             int y_cols = (y == m_cols - 1) ? cols - y * c : c;
             int m_area = x_rows * y_cols;
 
             block_sum_r = 0, block_sum_g = 0, block_sum_b = 0;
 
+            // sum up pixel values in one block
             for (i = 0; i < x_rows; ++i) {
                 for (j = 0; j < y_cols; ++j) {
                     int offset = (x * c + i) * cols + (y * c + j);
@@ -56,6 +56,7 @@ void mosaic_transform(pixel *pixels_o, pixel *pixels_i, int cols, int rows, int 
                     block_sum_b += pixels_i[offset].b;
                 }
             }
+            // mosaic calculation and assigin to output pixel array
             for (i = 0; i < x_rows; ++i) {
                 for (j = 0; j < y_cols; ++j) {
                     int offset = (x * c + i) * cols + (y * c + j);
@@ -71,9 +72,7 @@ void mosaic_transform(pixel *pixels_o, pixel *pixels_i, int cols, int rows, int 
         }
     }
 
-    // average value of rgb will be stor in a pixel
-    // value of average color / area should range from 0-255 if the
-    // image format is correct, explicit casting make this more readable
+    // average value of rgb and store in a pixel
     pixel average_color = {
         (pixval)(average_r / area),
         (pixval)(average_g / area),
@@ -87,10 +86,8 @@ void mosaic_transform(pixel *pixels_o, pixel *pixels_i, int cols, int rows, int 
 
 /**
  * @Mosaic filter OpenMP version
- *  this algorithm is to create a pixel matrix to store the average rgb
- *  value of the original image. its dimension is (m_rows x is m_cols)
- *  due to average, some data type casting is used here as well as the integer
- *  over flow check
+ *  divide all pixels into several blocks depend on c
+ *  for each block sum up all pixel values and compute the average
  *
  * @param pixels_o
  * @param pixels_i
@@ -101,7 +98,7 @@ void mosaic_transform(pixel *pixels_o, pixel *pixels_i, int cols, int rows, int 
 void mosaic_transform_omp(pixel *pixels_o, pixel *pixels_i, int cols, int rows, int c) {
     int x, y, i, j;                                     // loop counter
     int m_rows = (rows % c) ? rows / c + 1 : rows / c;  // check whether cols (rows) can be divided by c
-    int m_cols = (cols % c) ? cols / c + 1 : cols / c;  // if not, plus one to ensure enough memory has benn allocated
+    int m_cols = (cols % c) ? cols / c + 1 : cols / c;  // if not, plus one to ensure all pixels has been traversed
     int area = cols * rows;
     unsigned long long average_r, average_g, average_b;
     unsigned long long block_sum_r, block_sum_g, block_sum_b;
@@ -110,16 +107,18 @@ void mosaic_transform_omp(pixel *pixels_o, pixel *pixels_i, int cols, int rows, 
     average_r = 0; average_g = 0; average_b = 0;
 
     begin = omp_get_wtime();
-    // sum up all rgb values and stor in the average pixel
+
 #pragma omp parallel for private(x, y, i, j, block_sum_r, block_sum_g, block_sum_b) reduction(+ : average_r, average_g, average_b)
     for (x = 0; x < m_rows; ++x) {
         for (y = 0; y < m_cols; ++y) {
+            // partial mosaic for indivisible edges parts, and compute area
             int x_rows = (x == m_rows - 1) ? rows - x * c : c;
             int y_cols = (y == m_cols - 1) ? cols - y * c : c;
             int m_area = x_rows * y_cols;
 
             block_sum_r = 0, block_sum_g = 0, block_sum_b = 0;
 
+            // sum up pixel values in one block
             for (i = 0; i < x_rows; ++i) {
                 for (j = 0; j < y_cols; ++j) {
                     int offset = (x * c + i) * cols + (y * c + j);
@@ -128,6 +127,7 @@ void mosaic_transform_omp(pixel *pixels_o, pixel *pixels_i, int cols, int rows, 
                     block_sum_b += pixels_i[offset].b;
                 }
             }
+            // mosaic calculation and assigin to output pixel array
             for (i = 0; i < x_rows; ++i) {
                 for (j = 0; j < y_cols; ++j) {
                     int offset = (x * c + i) * cols + (y * c + j);
@@ -144,8 +144,6 @@ void mosaic_transform_omp(pixel *pixels_o, pixel *pixels_i, int cols, int rows, 
     }
 
     // average value of rgb will be stor in a pixel
-    // value of average color / area should range from 0-255 if the
-    // image format is correct, explicit casting make this more readable
     pixel average_color = {
         (pixval)(average_r / area),
         (pixval)(average_g / area),

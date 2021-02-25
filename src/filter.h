@@ -2,7 +2,7 @@
  * @file filter.h
  * @yzheng
  * @mosaic filter
- *  only mosaic_transform() and image_average_value() (and its OpenMP version) are used in mosaic.c
+ *
  * @version 0.1
  * @date 2019-03-09
  *
