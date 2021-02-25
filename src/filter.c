@@ -9,7 +9,6 @@
  * @copyright Copyright (c) 2019, yzheng
  *
  */
-#include <time.h>
 #include <omp.h>
 #include <stdlib.h>
 
@@ -35,11 +34,11 @@ void mosaic_transform(pixel *pixels_o, pixel *pixels_i, int cols, int rows, int 
     int area = cols * rows;
     unsigned long long average_r, average_g, average_b;
     unsigned long long block_sum_r, block_sum_g, block_sum_b;
-    clock_t begin, end;
+    double begin, duration;
 
     average_r = 0; average_g = 0; average_b = 0;
 
-    begin = clock();
+    begin = omp_get_wtime();
     // sum up all rgb values and stor in the average pixel
     for (x = 0; x < m_rows; ++x) {
         for (y = 0; y < m_cols; ++y) {
@@ -80,10 +79,9 @@ void mosaic_transform(pixel *pixels_o, pixel *pixels_i, int cols, int rows, int 
         (pixval)(average_g / area),
         (pixval)(average_b / area)
     };
-    end = clock();
-    float seconds = (end - begin) / (float)CLOCKS_PER_SEC;
+    duration = omp_get_wtime() - begin;
 
-    printf("CPU mode execution time took %.3lf ms\n", 1000 * seconds);
+    printf("CPU mode execution time took %.3lf ms\n", 1000 * duration);
     printf("CPU Average image colour red = %d, green = %d, blue = %d\n", average_color.r, average_color.g, average_color.b);
 }
 
