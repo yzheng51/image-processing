@@ -12,6 +12,9 @@ project(mosaic)
 # OpenMP
 find_package(OpenMP REQUIRED)
 
+# CUDA
+find_package(CUDA REQUIRED)
+
 # Create a sources variable with a link to all cpp files to compile
 aux_source_directory(src SOURCES)
 
@@ -19,7 +22,7 @@ aux_source_directory(src SOURCES)
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 
 # Add an executable
-add_executable(mosaic ${SOURCES})
+cuda_add_executable(mosaic ${SOURCES})
 
 if(OpenMP_CXX_FOUND)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
