@@ -14,6 +14,7 @@
 
 #include "libppm.h"
 #include "filter.h"
+#include "cuda_filter.h"
 
 #define FAILURE 0
 #define SUCCESS !FAILURE
@@ -65,13 +66,15 @@ int main(int argc, char *argv[]) {
             break;
         }
         case (CUDA) : {
-            printf("CUDA Implementation not required for assignment part 1\n");
+            mosaic_transform_cuda(pixels_o, pixels_i, cols, rows, c);
             break;
         }
         case (ALL) : {
             mosaic_transform(pixels_o, pixels_i, cols, rows, c);
             printf("\n");
             mosaic_transform_omp(pixels_o, pixels_i, cols, rows, c);
+            printf("\n");
+            mosaic_transform_cuda(pixels_o, pixels_i, cols, rows, c);
             break;
         }
     }
