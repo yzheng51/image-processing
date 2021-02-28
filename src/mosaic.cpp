@@ -100,7 +100,7 @@ int main(int argc, char *argv[]) {
 }
 
 void print_help() {
-    printf("mosaic_ C M -i input_file -o output_file [options]\n");
+    printf("mosaic C M -i input_file -o output_file [options]\n");
 
     printf("where:\n");
     printf("\tC              Is the mosaic cell size which should be any positive\n"
